@@ -3,6 +3,7 @@ import 'package:a_bujo/view/page/future_page.dart';
 import 'package:a_bujo/view/page/month_page.dart';
 import 'package:a_bujo/view/page/personal_page.dart';
 import 'package:a_bujo/view/page/week_page.dart';
+import 'package:a_bujo/view/widget/Item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -11,26 +12,17 @@ import 'index_page.dart';
 
 /// 首页
 class HomePage extends StatefulWidget {
-  /// 账户页面下标
-  static const INDEX_PAGE = 0;
-
   /// 未来页面下标
-  static const FUTURE_RECORD_PAGE = 1;
+  static const FUTURE_RECORD_PAGE = 0;
 
   /// 月常页面下标
-  static const MONTH_RECORD_PAGE = 2;
-
-  /// 周常页面下标
-//  static const WEEk_RECORD_PAGE = 3;
+  static const MONTH_RECORD_PAGE = 1;
 
   /// 日常页面下标
-  static const DAY_RECORD_PAGE = 3;
-
-  /// 个性化集子下标
-//  static const OTHER_RECORD_PAGE = 5;
+  static const DAY_RECORD_PAGE = 2;
 
   /// 个人页面下标
-  static const PERSONAL_PAGE = 4;
+  static const PERSONAL_PAGE = 3;
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -49,15 +41,17 @@ class _HomePageState extends State<HomePage> {
   /// 初始化控制器
   PageController pageController;
 
+  List<Item> _data;
+
   @override
   void initState() {
     super.initState();
-    _currentPageIndex = HomePage.INDEX_PAGE;
+    _currentPageIndex = HomePage.DAY_RECORD_PAGE;
 
     ///创建控制器的实例
     pageController = new PageController(
       ///用来配置PageView中默认显示的页面 从中间页面开始
-      initialPage: HomePage.INDEX_PAGE,
+      initialPage: HomePage.DAY_RECORD_PAGE,
 
       ///为true是保持加载的每个页面的状态
       keepPage: true,
@@ -72,7 +66,6 @@ class _HomePageState extends State<HomePage> {
 
     ///保存标签页面
     pageList = [
-      indexPage ??= new IndexPage(),
       futurePage ??= new FuturePage(),
       monthPage ??= new MonthPage(),
 //      weekPage ??= new WeekPage(),
@@ -102,6 +95,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    _data = _generateItems(8);
     return new Scaffold(
       body: PageView.builder(
           onPageChanged: _onPageChanged,
@@ -110,6 +104,35 @@ class _HomePageState extends State<HomePage> {
           itemBuilder: (BuildContext context, int index) {
             return pageList[index];
           }), //      CupertinoTabBar 是IOS分格
+      drawer: Drawer(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: DrawerHeader(
+                    child: Container(
+                      child: Row(
+                        children: [
+                          Icon(Icons.book),
+                          Text("索引"),
+                        ],
+                      ),
+                    ),
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                      image: NetworkImage(
+                          "https://cdn.stocksnap.io/img-thumbs/960w/ice-nature_PHKM6CXBLQ.jpg"),
+                      fit: BoxFit.cover,
+                    )),
+                  ),
+                )
+              ],
+            ),
+            Expanded(child: _buildPanel())
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
 //        onPressed: _incrementCounter,
         tooltip: 'Increment',
@@ -131,13 +154,6 @@ class _HomePageState extends State<HomePage> {
         mouseCursor: SystemMouseCursors.none,
         onTap: _onTapHandler,
         items: [
-          BottomNavigationBarItem(
-            label: ("索引"),
-            icon: Icon(
-              Icons.book,
-              color: Colors.orangeAccent,
-            ),
-          ),
           BottomNavigationBarItem(
             label: ("未来志"),
             icon: Icon(
@@ -174,11 +190,7 @@ class _HomePageState extends State<HomePage> {
   ///当前页面body样式
   getCurrentBody() {
     switch (_currentPageIndex) {
-      case HomePage.INDEX_PAGE:
-        //  ??运算，当homePage为空时将new HomePage()赋值给homePage，否则保持不变
-        indexPage ??= new IndexPage();
-        return indexPage;
-        break;
+      //  ??运算，当homePage为空时将new HomePage()赋值给homePage，否则保持不变
       case HomePage.FUTURE_RECORD_PAGE:
         futurePage ??= new FuturePage();
         return futurePage;
@@ -227,6 +239,50 @@ class _HomePageState extends State<HomePage> {
       controller: pageController,
       //所有的子Widget
       children: pageList,
+    );
+  }
+
+  List<Item> _generateItems(int numberOfItems) {
+    return List.generate(numberOfItems, (int index) {
+      return Item(
+        title: ListTile(
+          title: Text(
+            "分组$index",
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+        body: Padding(
+          padding: EdgeInsets.fromLTRB(20, 0, 10, 0),
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemBuilder: (BuildContext context, int childIndex) {
+              return ListTile(
+                leading: Icon(Icons.info),
+                title: Text(
+                  "成员$index - $childIndex",
+                  style: TextStyle(fontSize: 18),
+                ),
+              );
+            },
+            itemCount: 2,
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildPanel() {
+    return ListView(
+      shrinkWrap: true,
+      children: _data.map<ExpansionTile>((item) {
+        return ExpansionTile(
+           trailing: Icon(Icons.arrow_drop_up),
+          onExpansionChanged: (isOpen) {},
+          title: item.title,
+          children: [item.body],
+          initiallyExpanded: false,
+        );
+      }).toList(),
     );
   }
 }

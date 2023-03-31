@@ -5,7 +5,7 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-/// 索引页
+/// 日志页
 class DayPage extends StatefulWidget {
 	@override
 	_DayPageState createState() => _DayPageState();
@@ -31,8 +31,8 @@ class _DayPageState extends State<DayPage> {
 				child: Column(
 					mainAxisAlignment: MainAxisAlignment.center,
 					children: <Widget>[
-						Text('索引页', style: Theme.of(context).textTheme.headline6),
-						Text('Index Page',
+						Text('日志页', style: Theme.of(context).textTheme.headline6),
+						Text('Day Page',
 							style: Theme.of(context).textTheme.headline6),
 					],
 				),
